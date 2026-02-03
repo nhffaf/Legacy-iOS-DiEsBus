@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>Bus Schedule - Sunny Beach</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: #c5ccd4 url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAE0lEQVQIW2NkYGD4z8DAwMgABAAfCgIC+0HgxgAAAABJRU5ErkJggg==') repeat;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* iOS Header */
+        .ios-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(#b0b8c0), 
+                color-stop(0.5, #97a1ab),
+                color-stop(0.5, #7d8994),
+                to(#6d7882));
+            border-bottom: 1px solid #2c3137;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset, 0 1px 4px rgba(0,0,0,0.6);
+            z-index: 1000;
+        }
+
+        .ios-header h1 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #fff;
+            text-align: center;
+            line-height: 44px;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.8);
+        }
+
+        /* Main Container */
+        .container {
+            margin-top: 54px;
+            padding: 10px;
+            padding-bottom: 70px;
+        }
+
+        /* Grouped Table View Style */
+        .route-group {
+            margin-bottom: 30px;
+        }
+
+        .route-header {
+            font-size: 13px;
+            font-weight: bold;
+            color: #4c566c;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+            padding: 8px 15px 4px 15px;
+            text-transform: uppercase;
+        }
+
+        .route-card {
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(#fbfbfb), 
+                to(#ececec));
+            border: 1px solid #a6a6a6;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .route-title {
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(#6d94cc), 
+                color-stop(0.5, #5587c9),
+                color-stop(0.5, #4479c0),
+                to(#2c66b8));
+            padding: 12px 15px;
+            border-bottom: 1px solid #1a4d9c;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset;
+        }
+
+        .route-title h2 {
+            font-size: 17px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+        }
+
+        .route-subtitle {
+            font-size: 13px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 3px;
+            font-weight: normal;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.4);
+        }
+
+        .schedule-section {
+            border-bottom: 1px solid #c8c7cc;
+        }
+
+        .schedule-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-header {
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(#f7f7f7), 
+                to(#e4e4e4));
+            padding: 8px 15px;
+            border-bottom: 1px solid #d1d1d6;
+            box-shadow: 0 1px 0 rgba(255,255,255,0.8) inset;
+        }
+
+        .section-header h3 {
+            font-size: 15px;
+            font-weight: bold;
+            color: #000;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.9);
+        }
+
+        .direction-row {
+            background: #fff;
+            border-bottom: 1px solid #d1d1d6;
+            padding: 12px 15px;
+        }
+
+        .direction-row:last-child {
+            border-bottom: none;
+        }
+
+        .direction-label {
+            font-size: 14px;
+            font-weight: bold;
+            color: #000;
+            margin-bottom: 8px;
+        }
+
+        .times-grid {
+            display: -webkit-box;
+            display: box;
+            -webkit-box-lines: multiple;
+            box-lines: multiple;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .time-badge {
+            display: inline-block;
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(#fdfdfd), 
+                to(#e8e8e8));
+            border: 1px solid #adadad;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2), 
+                        0 1px 0 rgba(255,255,255,0.8) inset;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .time-badge.special {
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(#fff4d6), 
+                to(#ffe09e));
+            border-color: #d4b068;
+            color: #7a5a1c;
+        }
+
+        /* Tab Bar */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 49px;
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(#434343), 
+                to(#000000));
+            border-top: 1px solid #6a6a6a;
+            box-shadow: 0 -1px 0 rgba(255,255,255,0.1) inset;
+            display: -webkit-box;
+            display: box;
+            -webkit-box-pack: center;
+            box-pack: center;
+        }
+
+        .tab-button {
+            -webkit-box-flex: 1;
+            box-flex: 1;
+            text-align: center;
+            padding: 4px 0;
+            color: #999;
+            text-decoration: none;
+            border-right: 1px solid rgba(0,0,0,0.4);
+        }
+
+        .tab-button:last-child {
+            border-right: none;
+        }
+
+        .tab-button.active {
+            background: -webkit-gradient(linear, left top, left bottom, 
+                from(rgba(255,255,255,0.1)), 
+                to(rgba(255,255,255,0)));
+        }
+
+        .tab-icon {
+            width: 30px;
+            height: 30px;
+            margin: 0 auto 2px;
+            font-size: 24px;
+        }
+
+        .tab-label {
+            font-size: 10px;
+            color: #999;
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.8);
+        }
+
+        .tab-button.active .tab-label {
+            color: #fff;
+        }
+
+        /* Note styling */
+        .note {
+            background: #fffacd;
+            border: 1px solid #e6dc8f;
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin: 12px 15px;
+            font-size: 12px;
+            color: #555;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            right: 2px;
+            top: 54px;
+            bottom: 59px;
+            width: 3px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        .scroll-thumb {
+            position: absolute;
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border-radius: 2px;
+            min-height: 30px;
+        }
+
+        /* Loading shimmer */
+        @-webkit-keyframes shimmer {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .loading {
+            -webkit-animation: shimmer 1.5s infinite;
+        }
+
+        /* Hide content class */
+        .hidden {
+            display: none;
+        }
+
+        /* Active state for tappable elements */
+        .direction-row:active {
+            background: #d9d9d9;
+        }
+    </style>
+</head>
+<body>
+    <!-- iOS Header -->
+    <div class="ios-header">
+        <h1>🚌 Bus Schedule</h1>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="mainContainer">
+        
+        <!-- Line 1 -->
+        <div class="route-group">
+            <div class="route-header">Main Routes</div>
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 1: Sunny Beach ↔ Nessebar</h2>
+                    <div class="route-subtitle">Emona → Center → Fregata → Old Town</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Working Days</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach (Emona)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:30</span>
+                            <span class="time-badge">06:45</span>
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">07:15</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">07:45</span>
+                            <span class="time-badge">08:10</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">09:05</span>
+                            <span class="time-badge">09:50</span>
+                            <span class="time-badge">10:20</span>
+                            <span class="time-badge">10:45</span>
+                            <span class="time-badge">11:05</span>
+                            <span class="time-badge">11:20</span>
+                            <span class="time-badge">11:50</span>
+                            <span class="time-badge">12:25</span>
+                            <span class="time-badge">12:40</span>
+                            <span class="time-badge">13:00</span>
+                            <span class="time-badge">13:35</span>
+                            <span class="time-badge">14:05</span>
+                            <span class="time-badge">14:30</span>
+                            <span class="time-badge">14:35</span>
+                            <span class="time-badge">14:50</span>
+                            <span class="time-badge">15:35</span>
+                            <span class="time-badge">16:05</span>
+                            <span class="time-badge">16:45</span>
+                            <span class="time-badge">17:10</span>
+                            <span class="time-badge">17:30</span>
+                            <span class="time-badge">17:45</span>
+                            <span class="time-badge">18:10</span>
+                            <span class="time-badge">18:30</span>
+                            <span class="time-badge">19:15</span>
+                            <span class="time-badge">19:40</span>
+                            <span class="time-badge">20:45</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar (Old Town)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:45</span>
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">07:15</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">07:45</span>
+                            <span class="time-badge">08:05</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">09:05</span>
+                            <span class="time-badge">09:35</span>
+                            <span class="time-badge">10:05</span>
+                            <span class="time-badge">10:35</span>
+                            <span class="time-badge">11:05</span>
+                            <span class="time-badge">11:35</span>
+                            <span class="time-badge">11:55</span>
+                            <span class="time-badge">12:10</span>
+                            <span class="time-badge">12:45</span>
+                            <span class="time-badge">13:00</span>
+                            <span class="time-badge">13:15</span>
+                            <span class="time-badge">13:35</span>
+                            <span class="time-badge">13:50</span>
+                            <span class="time-badge">14:25</span>
+                            <span class="time-badge">14:45</span>
+                            <span class="time-badge">14:55</span>
+                            <span class="time-badge">15:15</span>
+                            <span class="time-badge">15:50</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">17:00</span>
+                            <span class="badge">17:30</span>
+                            <span class="time-badge">18:00</span>
+                            <span class="time-badge">18:30</span>
+                            <span class="time-badge">18:45</span>
+                            <span class="time-badge">19:10</span>
+                            <span class="time-badge">19:40</span>
+                            <span class="time-badge">19:55</span>
+                            <span class="time-badge">21:00</span>
+                            <span class="time-badge special">21:40*</span>
+                            <span class="time-badge special">22:50*</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Weekend / Holidays</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach (Emona)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:30</span>
+                            <span class="time-badge">06:45</span>
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">07:45</span>
+                            <span class="time-badge">08:15</span>
+                            <span class="time-badge">08:45</span>
+                            <span class="time-badge">10:00</span>
+                            <span class="time-badge">10:40</span>
+                            <span class="time-badge">11:45</span>
+                            <span class="time-badge">12:45</span>
+                            <span class="time-badge">13:15</span>
+                            <span class="time-badge">13:45</span>
+                            <span class="time-badge">14:45</span>
+                            <span class="time-badge">15:15</span>
+                            <span class="time-badge">15:45</span>
+                            <span class="time-badge">16:15</span>
+                            <span class="time-badge">16:45</span>
+                            <span class="time-badge">17:15</span>
+                            <span class="time-badge">17:45</span>
+                            <span class="time-badge">18:15</span>
+                            <span class="time-badge">18:45</span>
+                            <span class="time-badge">19:45</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar (Old Town)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:45</span>
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">08:00</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">09:00</span>
+                            <span class="time-badge">10:15</span>
+                            <span class="time-badge">10:55</span>
+                            <span class="time-badge">12:00</span>
+                            <span class="time-badge">13:00</span>
+                            <span class="time-badge">13:30</span>
+                            <span class="time-badge">14:00</span>
+                            <span class="time-badge">15:00</span>
+                            <span class="time-badge">15:30</span>
+                            <span class="time-badge">16:00</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">17:00</span>
+                            <span class="time-badge">17:30</span>
+                            <span class="time-badge">18:00</span>
+                            <span class="time-badge">18:30</span>
+                            <span class="time-badge">19:00</span>
+                            <span class="time-badge">20:00</span>
+                            <span class="time-badge special">21:35*</span>
+                            <span class="time-badge special">22:45*</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    * Bus from/to Burgas
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 2 -->
+        <div class="route-group">
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 2: Aquapark ↔ Nessebar</h2>
+                    <div class="route-subtitle">Aquapark → Black Sea District → Nessebar</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Working Days</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach (Aquapark)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:50</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">09:30</span>
+                            <span class="time-badge">10:30</span>
+                            <span class="time-badge">11:40</span>
+                            <span class="time-badge">12:45</span>
+                            <span class="time-badge">13:45</span>
+                            <span class="time-badge">14:40</span>
+                            <span class="time-badge">15:30</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">17:50</span>
+                            <span class="time-badge">18:45</span>
+                            <span class="time-badge">20:00</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar (Old Town)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:10</span>
+                            <span class="time-badge">08:00</span>
+                            <span class="time-badge">09:00</span>
+                            <span class="time-badge">10:00</span>
+                            <span class="time-badge">11:00</span>
+                            <span class="time-badge">12:25</span>
+                            <span class="time-badge">13:10</span>
+                            <span class="time-badge">14:15</span>
+                            <span class="time-badge">15:00</span>
+                            <span class="time-badge">16:00</span>
+                            <span class="time-badge">17:10</span>
+                            <span class="time-badge">18:20</span>
+                            <span class="time-badge">19:15</span>
+                            <span class="time-badge">20:30</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Weekend / Holidays</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach (Aquapark)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:35</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">11:15</span>
+                            <span class="time-badge">14:15</span>
+                            <span class="time-badge">16:00</span>
+                            <span class="time-badge">17:30</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar (Old Town)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">08:15</span>
+                            <span class="time-badge">09:30</span>
+                            <span class="time-badge">12:30</span>
+                            <span class="time-badge">14:45</span>
+                            <span class="time-badge">16:45</span>
+                            <span class="time-badge">18:15</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 4 -->
+        <div class="route-group">
+            <div class="route-header">Extended Routes</div>
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 4: Kosharitsa ↔ Sunny Beach</h2>
+                    <div class="route-subtitle">Via Nessebar</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Working Days</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:45</span>
+                            <span class="time-badge">07:45</span>
+                            <span class="time-badge">10:35</span>
+                            <span class="time-badge">12:10</span>
+                            <span class="time-badge">13:15</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">18:45</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">08:05</span>
+                            <span class="time-badge">10:50</span>
+                            <span class="time-badge">12:25</span>
+                            <span class="time-badge">13:30</span>
+                            <span class="time-badge">15:30</span>
+                            <span class="time-badge">17:00</span>
+                            <span class="time-badge">19:00</span>
+                            <span class="time-badge">20:10</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Kosharitsa</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:15</span>
+                            <span class="time-badge">07:15</span>
+                            <span class="time-badge">08:45</span>
+                            <span class="time-badge special">11:10*</span>
+                            <span class="time-badge">12:45</span>
+                            <span class="time-badge">13:50</span>
+                            <span class="time-badge">15:50</span>
+                            <span class="time-badge">17:15</span>
+                            <span class="time-badge special">19:15*</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Weekend / Holidays</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:45</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">12:00</span>
+                            <span class="time-badge">15:00</span>
+                            <span class="time-badge">17:00</span>
+                            <span class="time-badge">19:00</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge special">09:00**</span>
+                            <span class="time-badge">12:15</span>
+                            <span class="time-badge">15:15</span>
+                            <span class="time-badge">17:15</span>
+                            <span class="time-badge">19:15</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Kosharitsa</div>
+                        <div class="times-grid">
+                            <span class="time-badge special">07:20*</span>
+                            <span class="time-badge">09:40</span>
+                            <span class="time-badge">13:00</span>
+                            <span class="time-badge">15:30</span>
+                            <span class="time-badge">17:30</span>
+                            <span class="time-badge special">19:30*</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    * To Bus Station (Avtogara)<br>
+                    ** Via Sveti Vlas
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 5 -->
+        <div class="route-group">
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 5: Sveti Vlas ↔ Nessebar</h2>
+                    <div class="route-subtitle">Via Sunny Beach</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Working Days</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">08:05</span>
+                            <span class="time-badge">09:05</span>
+                            <span class="time-badge">11:35</span>
+                            <span class="time-badge">12:45</span>
+                            <span class="time-badge">13:50</span>
+                            <span class="time-badge">14:45</span>
+                            <span class="time-badge">15:50</span>
+                            <span class="time-badge">17:00</span>
+                            <span class="time-badge">18:30</span>
+                            <span class="time-badge">19:40</span>
+                            <span class="time-badge">21:00</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:15</span>
+                            <span class="time-badge">07:15</span>
+                            <span class="time-badge">08:20</span>
+                            <span class="time-badge">09:20</span>
+                            <span class="time-badge">10:50</span>
+                            <span class="time-badge">11:50</span>
+                            <span class="time-badge">12:25</span>
+                            <span class="time-badge">13:00</span>
+                            <span class="time-badge">14:05</span>
+                            <span class="time-badge">15:00</span>
+                            <span class="time-badge">16:05</span>
+                            <span class="time-badge">17:15</span>
+                            <span class="time-badge">18:45</span>
+                            <span class="time-badge">20:10</span>
+                            <span class="time-badge">21:15</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sveti Vlas</div>
+                        <div class="times-grid">
+                            <span class="time-badge special">05:50*</span>
+                            <span class="time-badge">06:30</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">08:35</span>
+                            <span class="time-badge">09:35</span>
+                            <span class="time-badge">11:05</span>
+                            <span class="time-badge">12:10</span>
+                            <span class="time-badge special">12:45*</span>
+                            <span class="time-badge">13:15</span>
+                            <span class="time-badge">14:20</span>
+                            <span class="time-badge">15:20</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">17:30</span>
+                            <span class="time-badge">19:00</span>
+                            <span class="time-badge">20:30</span>
+                            <span class="time-badge special">21:30*</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Weekend / Holidays</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">13:00</span>
+                            <span class="time-badge">16:00</span>
+                            <span class="time-badge">17:30</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:15</span>
+                            <span class="time-badge">07:15</span>
+                            <span class="time-badge">09:00</span>
+                            <span class="time-badge">11:00</span>
+                            <span class="time-badge">13:15</span>
+                            <span class="time-badge">14:45</span>
+                            <span class="time-badge">16:15</span>
+                            <span class="time-badge">17:45</span>
+                            <span class="time-badge">19:15</span>
+                            <span class="time-badge">20:15</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sveti Vlas</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:30</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge special">09:15**</span>
+                            <span class="time-badge special">11:15*</span>
+                            <span class="time-badge">13:30</span>
+                            <span class="time-badge">15:00</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge special">18:00*</span>
+                            <span class="time-badge">19:30</span>
+                            <span class="time-badge special">20:30*</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    * To Bus Station<br>
+                    ** Via Kosharitsa
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 6 -->
+        <div class="route-group">
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 6: Gyulyovtsa ↔ Nessebar</h2>
+                    <div class="route-subtitle">Via Sunny Beach</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Working Days</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:15</span>
+                            <span class="time-badge">11:05</span>
+                            <span class="time-badge">15:15</span>
+                            <span class="time-badge">19:55</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:40</span>
+                            <span class="time-badge">10:00</span>
+                            <span class="time-badge">11:30</span>
+                            <span class="time-badge">13:45</span>
+                            <span class="time-badge">15:35</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">17:00</span>
+                            <span class="time-badge">18:45</span>
+                            <span class="time-badge">20:10</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Gyulyovtsa</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:20</span>
+                            <span class="time-badge">07:00</span>
+                            <span class="time-badge">08:15</span>
+                            <span class="time-badge">10:30</span>
+                            <span class="time-badge">12:00</span>
+                            <span class="time-badge">14:15</span>
+                            <span class="time-badge">16:15</span>
+                            <span class="time-badge">17:40</span>
+                            <span class="time-badge">19:10</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Weekend / Holidays</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Nessebar</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">10:55</span>
+                            <span class="time-badge">14:00</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">20:00</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:45</span>
+                            <span class="time-badge">11:15</span>
+                            <span class="time-badge">14:15</span>
+                            <span class="time-badge">17:00</span>
+                            <span class="time-badge">20:15</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Gyulyovtsa</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:20</span>
+                            <span class="time-badge">08:15</span>
+                            <span class="time-badge">12:15</span>
+                            <span class="time-badge">15:45</span>
+                            <span class="time-badge">17:40</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 7 -->
+        <div class="route-group">
+            <div class="route-header">Coastal Routes</div>
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 7: Sunny Beach → Pomorie</h2>
+                    <div class="route-subtitle">Via Nessebar, Ravda, Aheloy</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Working Days Only</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:45</span>
+                            <span class="time-badge">12:40</span>
+                            <span class="time-badge">17:00</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Pomorie Center</div>
+                        <div class="times-grid">
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">14:15</span>
+                            <span class="time-badge">17:45</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    ⚠️ No service on weekends or holidays
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 8 -->
+        <div class="route-group">
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 8: Sunny Beach ↔ Elenite</h2>
+                    <div class="route-subtitle">Via Sveti Vlas</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Working Days</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:30</span>
+                            <span class="time-badge">10:00</span>
+                            <span class="time-badge">11:15</span>
+                            <span class="time-badge">13:35</span>
+                            <span class="time-badge">14:35</span>
+                            <span class="time-badge">15:35</span>
+                            <span class="time-badge">18:00</span>
+                            <span class="time-badge">19:35</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Elenite</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:55</span>
+                            <span class="time-badge">10:30</span>
+                            <span class="time-badge">11:45</span>
+                            <span class="time-badge">14:00</span>
+                            <span class="time-badge">15:00</span>
+                            <span class="time-badge">16:00</span>
+                            <span class="time-badge">18:30</span>
+                            <span class="time-badge">20:00</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Weekend / Holidays</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge">10:00</span>
+                            <span class="time-badge">12:00</span>
+                            <span class="time-badge">15:20</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Elenite</div>
+                        <div class="times-grid">
+                            <span class="time-badge">10:30</span>
+                            <span class="time-badge">12:30</span>
+                            <span class="time-badge">15:50</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 10 -->
+        <div class="route-group">
+            <div class="route-header">Burgas Connection</div>
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 10: Sunny Beach ↔ Burgas</h2>
+                    <div class="route-subtitle">Via Pomorie, Aheloy, Ravda, Nessebar</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Daily Service</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Sunny Beach</div>
+                        <div class="times-grid">
+                            <span class="time-badge special">06:10*</span>
+                            <span class="time-badge">06:10</span>
+                            <span class="time-badge">06:50</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">08:10</span>
+                            <span class="time-badge">08:50</span>
+                            <span class="time-badge">09:30</span>
+                            <span class="time-badge">10:10</span>
+                            <span class="time-badge">10:50</span>
+                            <span class="time-badge">11:30</span>
+                            <span class="time-badge">12:10</span>
+                            <span class="time-badge">12:50</span>
+                            <span class="time-badge">13:30</span>
+                            <span class="time-badge">14:10</span>
+                            <span class="time-badge">14:50</span>
+                            <span class="time-badge">15:30</span>
+                            <span class="time-badge">16:10</span>
+                            <span class="time-badge">16:50</span>
+                            <span class="time-badge">17:30</span>
+                            <span class="time-badge">18:10</span>
+                            <span class="time-badge">18:50</span>
+                            <span class="time-badge">19:30</span>
+                            <span class="time-badge">20:20</span>
+                            <span class="time-badge">21:00</span>
+                        </div>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">From Burgas</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:10</span>
+                            <span class="time-badge">06:50</span>
+                            <span class="time-badge">07:30</span>
+                            <span class="time-badge">08:10</span>
+                            <span class="time-badge">08:50</span>
+                            <span class="time-badge">09:30</span>
+                            <span class="time-badge">10:10</span>
+                            <span class="time-badge">10:50</span>
+                            <span class="time-badge">11:30</span>
+                            <span class="time-badge">12:10</span>
+                            <span class="time-badge">12:50</span>
+                            <span class="time-badge">13:30</span>
+                            <span class="time-badge">14:10</span>
+                            <span class="time-badge">14:50</span>
+                            <span class="time-badge">15:30</span>
+                            <span class="time-badge">16:10</span>
+                            <span class="time-badge">16:50</span>
+                            <span class="time-badge">17:30</span>
+                            <span class="time-badge">18:10</span>
+                            <span class="time-badge">18:50</span>
+                            <span class="time-badge">19:30</span>
+                            <span class="time-badge special">20:20*</span>
+                            <span class="time-badge">20:50</span>
+                            <span class="time-badge">22:05</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="note">
+                    * School days only
+                </div>
+            </div>
+        </div>
+
+        <!-- Line 22 -->
+        <div class="route-group">
+            <div class="route-card">
+                <div class="route-title">
+                    <h2>Line 22: Sunny Beach ↔ Burgas</h2>
+                    <div class="route-subtitle">Via Kableshkovo, Laka, Aheloy</div>
+                </div>
+                
+                <div class="schedule-section">
+                    <div class="section-header">
+                        <h3>Daily Service (Both Directions)</h3>
+                    </div>
+                    <div class="direction-row">
+                        <div class="direction-label">Departures (Same times both ways)</div>
+                        <div class="times-grid">
+                            <span class="time-badge">06:20</span>
+                            <span class="time-badge">07:10</span>
+                            <span class="time-badge">07:50</span>
+                            <span class="time-badge">08:30</span>
+                            <span class="time-badge">09:10</span>
+                            <span class="time-badge">09:50</span>
+                            <span class="time-badge">10:30</span>
+                            <span class="time-badge">11:10</span>
+                            <span class="time-badge">11:50</span>
+                            <span class="time-badge">12:30</span>
+                            <span class="time-badge">13:10</span>
+                            <span class="time-badge">13:50</span>
+                            <span class="time-badge">14:30</span>
+                            <span class="time-badge">15:10</span>
+                            <span class="time-badge">15:50</span>
+                            <span class="time-badge">16:30</span>
+                            <span class="time-badge">17:10</span>
+                            <span class="time-badge">17:50</span>
+                            <span class="time-badge">18:30</span>
+                            <span class="time-badge">19:10</span>
+                            <span class="time-badge">19:50</span>
+                            <span class="time-badge">21:20</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Operator Info -->
+        <div class="route-group">
+            <div class="note" style="margin: 0;">
+                📍 Valid from October 11, 2025<br>
+                🚌 Operated by Di Es Bus EOOD and M-Bus OOD
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+        <a href="#" class="tab-button active">
+            <div class="tab-icon">🚌</div>
+            <div class="tab-label">Schedule</div>
+        </a>
+        <a href="#" class="tab-button">
+            <div class="tab-icon">🗺️</div>
+            <div class="tab-label">Routes</div>
+        </a>
+        <a href="#" class="tab-button">
+            <div class="tab-icon">ℹ️</div>
+            <div class="tab-label">Info</div>
+        </a>
+    </div>
+
+    <script>
+        // Smooth scrolling behavior
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prevent default tab behavior
+            var tabs = document.querySelectorAll('.tab-button');
+            for (var i = 0; i < tabs.length; i++) {
+                tabs[i].addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            }
+            
+            // Get current time and highlight next bus
+            var now = new Date();
+            var currentHour = now.getHours();
+            var currentMinute = now.getMinutes();
+            var currentTime = currentHour * 60 + currentMinute;
+            
+            var badges = document.querySelectorAll('.time-badge');
+            var nextBusFound = false;
+            
+            for (var i = 0; i < badges.length; i++) {
+                var badge = badges[i];
+                var timeText = badge.textContent.replace('*', '').replace('**', '').trim();
+                var timeParts = timeText.split(':');
+                var badgeTime = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+                
+                if (!nextBusFound && badgeTime > currentTime) {
+                    badge.style.background = '-webkit-gradient(linear, left top, left bottom, from(#a8e6a8), to(#5bc85b))';
+                    badge.style.borderColor = '#4a934a';
+                    badge.style.color = '#1a4d1a';
+                    nextBusFound = true;
+                    
+                    // Scroll to next bus after a short delay
+                    setTimeout(function() {
+                        var yOffset = -100;
+                        var element = badge;
+                        var y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                        window.scrollTo({top: y, behavior: 'smooth'});
+                    }, 500);
+                    
+                    break;
+                }
+            }
+        });
+        
+        // Add iOS-style scroll bounce
+        var lastY = 0;
+        var container = document.getElementById('mainContainer');
+        
+        document.addEventListener('touchstart', function(e) {
+            lastY = e.touches[0].clientY;
+        });
+        
+        document.addEventListener('touchmove', function(e) {
+            var currentY = e.touches[0].clientY;
+            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            var scrollHeight = document.documentElement.scrollHeight;
+            var clientHeight = document.documentElement.clientHeight;
+            
+            // Prevent overscroll
+            if ((scrollTop <= 0 && currentY > lastY) || 
+                (scrollTop + clientHeight >= scrollHeight && currentY < lastY)) {
+                e.preventDefault();
+            }
+            
+            lastY = currentY;
+        });
+    </script>
+</body>
+</html>
